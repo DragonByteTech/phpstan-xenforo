@@ -80,7 +80,9 @@ To override both, set `XF_ROOT` (the installation root) and `XF_ADDON` (comma-se
 IDs).
 
 Add-ons listed in `addon.json` `require` are loaded as well, so members they add through class
-extensions resolve too.
+extensions resolve too. Class extensions of any other add-on are loaded when analysis reaches one
+of its proxies, as optional integrations do. Add-ons installed from a release, without
+development output, are read from `_data/class_extensions.xml`.
 
 Keep the file out of release builds by adding this to the `exec` list in `build.json`:
 

@@ -5,6 +5,7 @@ namespace DragonByteTech\PHPStanXenForo\Tests\Fixtures;
 use XF\Entity\User;
 use XF\Entity\UserOption;
 use XF\Finder\UserFinder;
+use XF\Mvc\Entity\AbstractCollection;
 use XF\Mvc\Entity\Manager;
 use XF\Mvc\ParameterBag;
 
@@ -21,6 +22,22 @@ function finderChain(): void
 	$finder = \XF::finder(UserFinder::class)->where('user_id', 1)->order('username');
 	\PHPStan\Testing\assertType('XF\Finder\UserFinder', $finder);
 	\PHPStan\Testing\assertType('XF\Mvc\Entity\AbstractCollection<XF\Entity\User>', $finder->limitByPage(1, 20)->fetch());
+}
+
+function findByContentType(int $id): void
+{
+	\PHPStan\Testing\assertType('XF\Mvc\Entity\AbstractCollection<XF\Mvc\Entity\Entity>', \XF::app()->findByContentType('post', [1, 2]));
+	\PHPStan\Testing\assertType('XF\Mvc\Entity\Entity|null', \XF::app()->findByContentType('post', $id));
+}
+
+/**
+ * @return AbstractCollection<User>
+ */
+function emptyCollection(Manager $em): AbstractCollection
+{
+	\PHPStan\Testing\assertType('XF\Mvc\Entity\ArrayCollection<*NEVER*>', $em->getEmptyCollection());
+
+	return $em->getEmptyCollection();
 }
 
 function classExtensionMembers(User $user, UserOption $option): void

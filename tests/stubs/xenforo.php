@@ -36,6 +36,13 @@ namespace
 	}
 }
 
+namespace XF
+{
+	class App
+	{
+	}
+}
+
 namespace XF\Mvc\Entity
 {
 	abstract class Entity
@@ -66,6 +73,10 @@ namespace XF\Mvc\Entity
 		{
 			return $structure;
 		}
+	}
+
+	class Manager
+	{
 	}
 
 	abstract class Finder

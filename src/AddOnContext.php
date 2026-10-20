@@ -2,7 +2,7 @@
 
 namespace DragonByteTech\PHPStanXenForo;
 
-use function array_filter, array_key_exists, array_keys, array_shift, basename, class_exists, dirname, explode, file_get_contents, getcwd, getenv, glob, is_array, is_dir, is_file, is_string, json_decode, ltrim, realpath, str_contains, str_replace, str_starts_with, strlen, strrpos, substr;
+use function array_filter, array_key_exists, array_keys, array_shift, array_slice, basename, class_exists, count, dirname, explode, file_get_contents, getcwd, getenv, glob, implode, is_array, is_dir, is_file, is_string, json_decode, ltrim, realpath, simplexml_load_file, str_contains, str_replace, str_starts_with, strlen, strrpos, substr;
 
 /**
  * Describes the XenForo installation and add-ons being analysed. The bootstrap file and the
@@ -26,6 +26,11 @@ final class AddOnContext
 	 * @var array<string, true>
 	 */
 	private array $extensionClasses = [];
+
+	/**
+	 * @var array<string, true>
+	 */
+	private array $loadedAddOnIds = [];
 
 	/**
 	 * @param list<string> $addOnIds the analysed add-on first, then installed dependencies
@@ -123,6 +128,17 @@ final class AddOnContext
 
 	public function getProxyBase(string $proxyClass): ?string
 	{
+		if (!isset($this->proxyBases[$proxyClass]) && str_contains($proxyClass, '\\XFCP_'))
+		{
+			// Optional integrations extend classes of add-ons they do not require, and those
+			// classes extend proxies that only their own add-on declares.
+			$addOnId = $this->findAddOnIdForClass($proxyClass);
+			if ($addOnId !== null)
+			{
+				$this->loadClassExtensions($addOnId);
+			}
+		}
+
 		return $this->proxyBases[$proxyClass] ?? null;
 	}
 
@@ -182,21 +198,16 @@ final class AddOnContext
 
 	private function loadClassExtensions(string $addOnId): void
 	{
-		$files = glob($this->getAddOnDirectory($addOnId) . '/_output/class_extensions/*.json') ?: [];
-		foreach ($files AS $file)
+		if (isset($this->loadedAddOnIds[$addOnId]))
 		{
-			if (basename($file) === '_metadata.json')
-			{
-				continue;
-			}
+			return;
+		}
 
-			$extension = json_decode((string) file_get_contents($file), true);
-			if (
-				!is_array($extension)
-				|| !is_string($extension['from_class'] ?? null)
-				|| !is_string($extension['to_class'] ?? null)
-				|| !($extension['active'] ?? true)
-			)
+		$this->loadedAddOnIds[$addOnId] = true;
+
+		foreach ($this->readClassExtensions($addOnId) AS $extension)
+		{
+			if (!$extension['active'])
 			{
 				continue;
 			}
@@ -216,6 +227,86 @@ final class AddOnContext
 			$this->extensions[$fromClass][] = $toClass;
 			$this->extensionClasses[$toClass] = true;
 		}
+	}
+
+	/**
+	 * Add-ons installed from a release have no development output, only release data.
+	 *
+	 * @return list<array{from_class: string, to_class: string, active: bool}>
+	 */
+	private function readClassExtensions(string $addOnId): array
+	{
+		$addOnDir = $this->getAddOnDirectory($addOnId);
+		$extensions = [];
+
+		if (is_dir($addOnDir . '/_output/class_extensions'))
+		{
+			$files = glob($addOnDir . '/_output/class_extensions/*.json') ?: [];
+			foreach ($files AS $file)
+			{
+				if (basename($file) === '_metadata.json')
+				{
+					continue;
+				}
+
+				$extension = json_decode((string) file_get_contents($file), true);
+				if (
+					is_array($extension)
+					&& is_string($extension['from_class'] ?? null)
+					&& is_string($extension['to_class'] ?? null)
+				)
+				{
+					$extensions[] = [
+						'from_class' => $extension['from_class'],
+						'to_class' => $extension['to_class'],
+						'active' => (bool) ($extension['active'] ?? true),
+					];
+				}
+			}
+
+			return $extensions;
+		}
+
+		$file = $addOnDir . '/_data/class_extensions.xml';
+		$xml = is_file($file) ? simplexml_load_file($file) : false;
+		if ($xml === false)
+		{
+			return [];
+		}
+
+		foreach ($xml->extension AS $extension)
+		{
+			$extensions[] = [
+				'from_class' => (string) $extension['from_class'],
+				'to_class' => (string) $extension['to_class'],
+				'active' => (string) ($extension['active'] ?? '1') !== '0',
+			];
+		}
+
+		return $extensions;
+	}
+
+	/**
+	 * Add-on IDs are one or two namespace segments, as in XFMG or Vendor/AddOn.
+	 */
+	private function findAddOnIdForClass(string $class): ?string
+	{
+		if ($this->rootDir === null)
+		{
+			return null;
+		}
+
+		$segments = explode('\\', $class);
+		for ($length = 1; $length <= 2 && $length < count($segments); $length++)
+		{
+			$addOnId = implode('/', array_slice($segments, 0, $length));
+			if (is_file($this->getAddOnDirectory($addOnId) . '/addon.json'))
+			{
+				return $addOnId;
+			}
+		}
+
+		return null;
 	}
 
 	/**

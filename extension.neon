@@ -52,6 +52,12 @@ parameters:
 			message: '#^Parameter \#\d+ \$(params|bind) of method XF\\(Db\\[\w\\]+|AddOn\\AbstractSetup)::\w+\(\) expects array, .+ given\.$#'
 			reportUnmatched: false
 
+		# Purchase documents purchasableId as string, but XenForo's purchasables assign entity IDs.
+		-
+			identifier: assign.propertyType
+			message: '#^Property XF\\Purchasable\\Purchase::\$purchasableId \(string\) does not accept int(\|null)?\.$#'
+			reportUnmatched: false
+
 		# Handlers document titles as string, but XenForo returns phrases throughout.
 		-
 			identifier: method.childReturnType
@@ -87,6 +93,16 @@ services:
 
 	-
 		class: DragonByteTech\PHPStanXenForo\Type\FinderFluentReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Type\FindByContentTypeReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Type\EmptyCollectionReturnTypeExtension
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
 
