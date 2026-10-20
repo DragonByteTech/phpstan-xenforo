@@ -78,6 +78,13 @@ parameters:
 			message: '#^Return type \(float\) of method .+::adjustStatValue\(\) should be compatible with return type \(int\) of method XF\\Stats\\AbstractHandler::adjustStatValue\(\)$#'
 			reportUnmatched: false
 
+		# groupBy() documents its callables as `callable(T $e): int|string`, which parses as a
+		# callable returning int, so string keys are reported.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#\d+ \$(grouper|childKeyFn) of method XF\\Mvc\\Entity\\AbstractCollection<.+>::groupBy\(\) expects \(callable\(.+\): int\)\|int\|string(\|null)?, Closure\(.+\): string given\.$#'
+			reportUnmatched: false
+
 		# Handlers document titles as string, but XenForo returns phrases throughout.
 		-
 			identifier: method.childReturnType
