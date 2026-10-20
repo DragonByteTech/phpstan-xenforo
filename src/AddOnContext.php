@@ -438,10 +438,15 @@ final class AddOnContext
 			$json = is_file($addOnDir . '/addon.json')
 				? json_decode((string) file_get_contents($addOnDir . '/addon.json'), true)
 				: null;
-			$require = is_array($json) ? $json['require'] ?? null : null;
-			foreach (array_keys(is_array($require) ? $require : []) AS $requirement)
+			// Soft requirements are optional integrations; they load only when installed, as
+			// add-ons without a directory are skipped above.
+			foreach (['require', 'require-soft'] AS $key)
 			{
-				$pending[] = (string) $requirement;
+				$requirements = is_array($json) ? $json[$key] ?? null : null;
+				foreach (array_keys(is_array($requirements) ? $requirements : []) AS $requirement)
+				{
+					$pending[] = (string) $requirement;
+				}
 			}
 		}
 

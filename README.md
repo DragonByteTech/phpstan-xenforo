@@ -82,7 +82,7 @@ phpstan analyse -c src/addons/Vendor/AddOn/phpstan.neon.dist
 To override both, set `XF_ROOT` (the installation root) and `XF_ADDON` (comma-separated add-on
 IDs).
 
-Add-ons listed in `addon.json` `require` are loaded as well, so members they add through class
+Installed add-ons listed in `addon.json` `require` or `require-soft` are loaded as well, so members they add through class
 extensions resolve too. Class extensions of any other add-on are loaded when analysis reaches one
 of its proxies, as optional integrations do. Add-ons installed from a release, without
 development output, are read from `_data/class_extensions.xml`.

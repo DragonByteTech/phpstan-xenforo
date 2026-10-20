@@ -110,6 +110,11 @@ services:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
 
 	-
+		class: DragonByteTech\PHPStanXenForo\Type\FinderEntityReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
 		class: DragonByteTech\PHPStanXenForo\Type\FindByContentTypeReturnTypeExtension
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
