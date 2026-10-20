@@ -1,5 +1,8 @@
 # PHPStan for XenForo add-ons
 
+[![DragonByte Tech](https://img.shields.io/badge/DragonByte%20Tech-%23B71532)](https://www.dragonbyte-tech.com)
+[![Status](https://img.shields.io/github/check-runs/DragonByteTech/phpstan-xenforo/main?label=status)](https://github.com/DragonByteTech/phpstan-xenforo/actions)
+
 A [PHPStan](https://phpstan.org) extension that analyses [XenForo](https://xenforo.com) 2.3 add-ons from inside a development installation,
 without the false positives XenForo's runtime conventions otherwise produce.
 
