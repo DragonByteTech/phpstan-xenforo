@@ -2,6 +2,7 @@
 
 namespace DragonByteTech\PHPStanXenForo\Tests\Fixtures;
 
+use XF\Entity\StyleProperty;
 use XF\Entity\User;
 use XF\Entity\UserOption;
 use XF\Finder\UserFinder;
@@ -38,6 +39,11 @@ function emptyCollection(Manager $em): AbstractCollection
 	\PHPStan\Testing\assertType('XF\Mvc\Entity\ArrayCollection<*NEVER*>', $em->getEmptyCollection());
 
 	return $em->getEmptyCollection();
+}
+
+function masterPhrase(StyleProperty $styleProperty): void
+{
+	\PHPStan\Testing\assertType('XF\Entity\Phrase|null', $styleProperty->getMasterPhrase(true));
 }
 
 function classExtensionMembers(User $user, UserOption $option): void

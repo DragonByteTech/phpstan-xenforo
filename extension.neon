@@ -107,6 +107,11 @@ services:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
 
 	-
+		class: DragonByteTech\PHPStanXenForo\Type\MasterPhraseReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
 		class: DragonByteTech\PHPStanXenForo\Ignore\ExtensionTypeMismatchIgnoreExtension
 		tags:
 			- phpstan.ignoreErrorExtension
