@@ -1,0 +1,111 @@
+parametersSchema:
+	xenforo: structure([
+		coreOptionsStub: schema(string(), nullable())
+	])
+
+parameters:
+	xenforo:
+		# Output of `php cmd.php xf-dev:generate-options-stub`, to type core options.
+		# Defaults to Options.stub in the XenForo root, where the command writes it.
+		coreOptionsStub: null
+
+	bootstrapFiles:
+		- bootstrap.php
+
+	# Each exposes arbitrary keys through __get().
+	universalObjectCratesClasses:
+		- XF\App
+		- XF\Container
+		- XF\Language
+		- XF\Payment\CallbackState
+		- XF\Mvc\ParameterBag
+		- XF\Session\Session
+		- XF\Mvc\Entity\ArrayValidator
+		- XF\Import\Data\AbstractData
+		- XF\CustomField\Set
+		- XF\Api\Result\EntityResult
+
+	# Every rule names a XenForo class, so none can match in other projects when the extension
+	# is installed globally. Broader conventions are in XenForoDocblockIgnoreExtension.
+	ignoreErrors:
+		# Stub files cannot correct these: PHPStan validates stubs before the bootstrap file
+		# makes XenForo's classes loadable.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#2 \$type of method XF\\Mvc\\Controller::filter\(\) expects string\|null, array.* given\.$#'
+			reportUnmatched: false
+		-
+			identifier: method.childReturnType
+			message: '#^Return type \(XF\\Widget\\WidgetRenderer(\|null)?\) of method .+::render\(\) should be compatible with return type \(string\|null\) of method XF\\Widget\\AbstractWidget::render\(\)$#'
+			reportUnmatched: false
+
+		# AbstractCollection::filter() uses the callback result for its truthiness, as
+		# array_filter() does, but documents it as callable(T): bool.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#1 \$callback of method XF\\Mvc\\Entity\\AbstractCollection<(.+)>::filter\(\) expects callable\(\1\): bool, Closure\(\1\): .+ given\.$#'
+			reportUnmatched: false
+
+		# Query parameters are documented as arrays, but AbstractStatement wraps a scalar in one.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#\d+ \$(params|bind) of method XF\\(Db\\[\w\\]+|AddOn\\AbstractSetup)::\w+\(\) expects array, .+ given\.$#'
+			reportUnmatched: false
+
+		# Handlers document titles as string, but XenForo returns phrases throughout.
+		-
+			identifier: method.childReturnType
+			message: '#^Return type \(XF\\Phrase(\|[^)]+)?\) of method .+ should be compatible with return type \(string(\|null)?\) of method XF\\.+$#'
+			reportUnmatched: false
+
+services:
+	-
+		class: DragonByteTech\PHPStanXenForo\ShortNameResolver
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Reflection\ClassExtensionMembersExtension
+		tags:
+			- phpstan.broker.methodsClassReflectionExtension
+			- phpstan.broker.propertiesClassReflectionExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Reflection\EntityStructurePropertiesExtension
+		tags:
+			- phpstan.broker.propertiesClassReflectionExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Reflection\OptionsPropertiesExtension
+		arguments:
+			coreOptionsStub: %xenforo.coreOptionsStub%
+		tags:
+			- phpstan.broker.propertiesClassReflectionExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Type\ShortNameTypeResolverExtension
+		tags:
+			- phpstan.broker.expressionTypeResolverExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Type\FinderFluentReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Ignore\ExtensionTypeMismatchIgnoreExtension
+		tags:
+			- phpstan.ignoreErrorExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Ignore\ShortNameArgumentIgnoreExtension
+		tags:
+			- phpstan.ignoreErrorExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Ignore\EntityColumnAssignIgnoreExtension
+		tags:
+			- phpstan.ignoreErrorExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Ignore\XenForoDocblockIgnoreExtension
+		tags:
+			- phpstan.ignoreErrorExtension

@@ -1,0 +1,30 @@
+{
+	"name": "dragonbytetech/phpstan-xenforo",
+	"description": "PHPStan extension for analysing XenForo 2.3 add-ons without false positives from class extensions, entity structures and options",
+	"type": "phpstan-extension",
+	"license": "MIT",
+	"keywords": [
+		"phpstan",
+		"xenforo",
+		"static analysis"
+	],
+	"require": {
+		"php": "^8.1",
+		"phpstan/phpstan": "^2.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"DragonByteTech\\PHPStanXenForo\\": "src/"
+		}
+	},
+	"extra": {
+		"phpstan": {
+			"includes": [
+				"extension.neon"
+			]
+		}
+	},
+	"config": {
+		"sort-packages": true
+	}
+}

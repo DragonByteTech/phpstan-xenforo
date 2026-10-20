@@ -1,0 +1,14 @@
+# Type inference checks for the extension. assertType() mismatches are reported as errors.
+# Run from an add-on that the fixtures reference (see README.md):
+#   cd <xf>/src/addons/DBTech/MemberMap && phpstan analyse -c <package>/tests/phpstan.neon
+# extension.neon comes from phpstan/extension-installer; include it here if that is not installed.
+
+parameters:
+	level: 5
+
+	# XenForo PHPDoc describes intent rather than enforced types, and add-ons guard against
+	# values the docblocks rule out.
+	treatPhpDocTypesAsCertain: false
+
+	paths:
+		- fixtures
