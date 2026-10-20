@@ -2,7 +2,7 @@
 
 namespace DragonByteTech\PHPStanXenForo;
 
-use function array_filter, array_key_exists, array_keys, array_shift, array_values, basename, class_exists, dirname, explode, file_get_contents, getcwd, getenv, glob, is_array, is_dir, is_file, is_string, json_decode, ltrim, realpath, str_contains, str_replace, str_starts_with, strlen, strrpos, substr;
+use function array_filter, array_key_exists, array_keys, array_shift, basename, class_exists, dirname, explode, file_get_contents, getcwd, getenv, glob, is_array, is_dir, is_file, is_string, json_decode, ltrim, realpath, str_contains, str_replace, str_starts_with, strlen, strrpos, substr;
 
 /**
  * Describes the XenForo installation and add-ons being analysed. The bootstrap file and the
@@ -61,7 +61,7 @@ final class AddOnContext
 			? explode(',', $targetIds)
 			: array_filter([self::findAddOnId($rootDir, $workingDirectory)]);
 
-		return new self($rootDir, self::withDependencies($rootDir, array_values($targetIds)));
+		return new self($rootDir, self::withDependencies($rootDir, $targetIds));
 	}
 
 	/**
@@ -276,7 +276,8 @@ final class AddOnContext
 			$json = is_file($addOnDir . '/addon.json')
 				? json_decode((string) file_get_contents($addOnDir . '/addon.json'), true)
 				: null;
-			foreach (array_keys(is_array($json['require'] ?? null) ? $json['require'] : []) AS $requirement)
+			$require = is_array($json) ? $json['require'] ?? null : null;
+			foreach (array_keys(is_array($require) ? $require : []) AS $requirement)
 			{
 				$pending[] = (string) $requirement;
 			}

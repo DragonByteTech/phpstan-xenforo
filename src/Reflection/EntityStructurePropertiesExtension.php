@@ -104,9 +104,11 @@ final class EntityStructurePropertiesExtension implements PropertiesClassReflect
 
 		foreach ($structure->columns AS $column => $definition)
 		{
-			$typeString = !empty($definition['typeHint'])
-				? $definition['typeHint']
-				: self::getColumnTypes()[$definition['type']] ?? 'mixed';
+			$typeHint = $definition['typeHint'] ?? null;
+			$columnType = $definition['type'] ?? null;
+			$typeString = is_string($typeHint) && $typeHint !== ''
+				? $typeHint
+				: (is_int($columnType) ? self::getColumnTypes()[$columnType] ?? 'mixed' : 'mixed');
 			$type = $this->resolveType($typeString);
 			if (!empty($definition['nullable']) && !str_ends_with($typeString, '|null'))
 			{
