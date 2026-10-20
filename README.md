@@ -1,6 +1,6 @@
 # PHPStan for XenForo add-ons
 
-A PHPStan extension that analyses XenForo 2.3 add-ons from inside a development installation,
+A [PHPStan](https://phpstan.org) extension that analyses [XenForo](https://xenforo.com) 2.3 add-ons from inside a development installation,
 without the false positives XenForo's runtime conventions otherwise produce.
 
 ## What it handles

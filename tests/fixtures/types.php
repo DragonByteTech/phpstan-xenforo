@@ -52,6 +52,15 @@ function usersByNames(): void
 	\PHPStan\Testing\assertType('XF\Mvc\Entity\ArrayCollection<XF\Entity\User>', \XF::repository(UserRepository::class)->getUsersByNames(['Admin']));
 }
 
+/**
+ * @param array<int, User> $users
+ */
+function basicCollection(Manager $em, array $users): void
+{
+	\PHPStan\Testing\assertType('XF\Mvc\Entity\ArrayCollection<XF\Entity\User>', $em->getBasicCollection($users));
+	\PHPStan\Testing\assertType('XF\Mvc\Entity\ArrayCollection<*NEVER*>', $em->getBasicCollection([]));
+}
+
 function classExtensionMembers(User $user, UserOption $option): void
 {
 	// Column added by DBTech\MemberMap\XF\Entity\UserOption::getStructure().

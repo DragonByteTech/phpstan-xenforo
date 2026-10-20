@@ -58,6 +58,19 @@ parameters:
 			message: '#^Property XF\\Purchasable\\Purchase::\$purchasableId \(string\) does not accept int(\|null)?\.$#'
 			reportUnmatched: false
 
+		# ActivityLogRepository::log() documents its values as a list of metric maps, but it takes
+		# one map, as core's own handlers pass it.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#3 \$values of method XF\\Repository\\ActivityLogRepository::log\(\) expects array<int, array<string, int>>, array<string, int> given\.$#'
+			reportUnmatched: false
+
+		# getReplyMetricsSimple() documents its query parameters as a map, but they are positional.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#4 \$params of method XF\\ActivityLog\\AbstractHandler<.+>::getReplyMetricsSimple\(\) expects array<string, mixed>, array<int, .+> given\.$#'
+			reportUnmatched: false
+
 		# Handlers document titles as string, but XenForo returns phrases throughout.
 		-
 			identifier: method.childReturnType
@@ -103,6 +116,11 @@ services:
 
 	-
 		class: DragonByteTech\PHPStanXenForo\Type\EmptyCollectionReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Type\BasicCollectionReturnTypeExtension
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
 
