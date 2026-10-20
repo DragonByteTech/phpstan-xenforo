@@ -71,6 +71,13 @@ parameters:
 			message: '#^Parameter \#4 \$params of method XF\\ActivityLog\\AbstractHandler<.+>::getReplyMetricsSimple\(\) expects array<string, mixed>, array<int, .+> given\.$#'
 			reportUnmatched: false
 
+		# Stats handlers document adjustStatValue() as int, but scaled values are fractional, as
+		# core's AttachmentHandler returns round(..., 2).
+		-
+			identifier: method.childReturnType
+			message: '#^Return type \(float\) of method .+::adjustStatValue\(\) should be compatible with return type \(int\) of method XF\\Stats\\AbstractHandler::adjustStatValue\(\)$#'
+			reportUnmatched: false
+
 		# Handlers document titles as string, but XenForo returns phrases throughout.
 		-
 			identifier: method.childReturnType
@@ -138,6 +145,11 @@ services:
 		class: DragonByteTech\PHPStanXenForo\Type\UsersByNamesReturnTypeExtension
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
+		class: DragonByteTech\PHPStanXenForo\Type\MailTransportReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicStaticMethodReturnTypeExtension
 
 	-
 		class: DragonByteTech\PHPStanXenForo\Ignore\ExtensionTypeMismatchIgnoreExtension

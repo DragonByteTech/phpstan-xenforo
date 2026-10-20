@@ -50,6 +50,13 @@ namespace XF\Repository
 	}
 }
 
+namespace XF\Mail
+{
+	class Mailer
+	{
+	}
+}
+
 namespace XF\Mvc\Entity
 {
 	abstract class Entity

@@ -6,6 +6,7 @@ use XF\Entity\StyleProperty;
 use XF\Entity\User;
 use XF\Entity\UserOption;
 use XF\Finder\UserFinder;
+use XF\Mail\Mailer;
 use XF\Mvc\Entity\AbstractCollection;
 use XF\Mvc\Entity\Manager;
 use XF\Mvc\ParameterBag;
@@ -59,6 +60,11 @@ function basicCollection(Manager $em, array $users): void
 {
 	\PHPStan\Testing\assertType('XF\Mvc\Entity\ArrayCollection<XF\Entity\User>', $em->getBasicCollection($users));
 	\PHPStan\Testing\assertType('XF\Mvc\Entity\ArrayCollection<*NEVER*>', $em->getBasicCollection([]));
+}
+
+function mailTransport(): void
+{
+	\PHPStan\Testing\assertType('Symfony\Component\Mailer\Transport\AbstractTransport', Mailer::getTransportFromOption('sendmail', []));
 }
 
 function classExtensionMembers(User $user, UserOption $option): void
