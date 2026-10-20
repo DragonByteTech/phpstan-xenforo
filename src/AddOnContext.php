@@ -43,23 +43,39 @@ final class AddOnContext
 
 	public static function get(): self
 	{
-		return self::$instance ??= self::detect((string) getcwd());
+		return self::$instance ??= self::detect((string) getcwd(), self::getConfigurationDirectory());
 	}
 
-	public static function detect(string $workingDirectory): self
+	/**
+	 * @param ?string $configurationDirectory searched when the working directory is not inside
+	 *                                        an installation or add-on, as IDEs run PHPStan from
+	 *                                        the project root
+	 */
+	public static function detect(string $workingDirectory, ?string $configurationDirectory = null): self
 	{
 		$workingDirectory = realpath($workingDirectory) ?: $workingDirectory;
 
-		$rootDir = self::locateRootDirectory($workingDirectory);
+		$rootDir = self::locateRootDirectory($workingDirectory, $configurationDirectory);
 		if ($rootDir === null)
 		{
 			return new self(null, []);
 		}
 
 		$targetIds = getenv('XF_ADDON');
-		$targetIds = is_string($targetIds) && $targetIds !== ''
-			? explode(',', $targetIds)
-			: array_filter([self::findAddOnId($rootDir, $workingDirectory)]);
+		if (is_string($targetIds) && $targetIds !== '')
+		{
+			$targetIds = explode(',', $targetIds);
+		}
+		else
+		{
+			$addOnId = self::findAddOnId($rootDir, $workingDirectory);
+			if ($addOnId === null && $configurationDirectory !== null)
+			{
+				$addOnId = self::findAddOnId($rootDir, $configurationDirectory);
+			}
+
+			$targetIds = array_filter([$addOnId]);
+		}
 
 		return new self($rootDir, self::withDependencies($rootDir, $targetIds));
 	}
@@ -68,7 +84,7 @@ final class AddOnContext
 	 * The extension is often installed globally, so finding no installation means the project
 	 * is not XenForo and the extension stays inactive.
 	 */
-	public static function locateRootDirectory(string $workingDirectory): ?string
+	public static function locateRootDirectory(string $workingDirectory, ?string $configurationDirectory = null): ?string
 	{
 		$rootDir = getenv('XF_ROOT');
 		if (is_string($rootDir) && $rootDir !== '')
@@ -81,6 +97,11 @@ final class AddOnContext
 		else
 		{
 			$rootDir = self::findRootDirectory($workingDirectory);
+			if ($rootDir === null && $configurationDirectory !== null)
+			{
+				$rootDir = self::findRootDirectory($configurationDirectory);
+			}
+
 			if ($rootDir === null)
 			{
 				return null;
@@ -209,6 +230,56 @@ final class AddOnContext
 		}
 
 		return \XF::getClassForAlias($class);
+	}
+
+	/**
+	 * Reads --configuration from the command line, since PHPStan does not expose the
+	 * configuration path before bootstrap files run.
+	 */
+	public static function getConfigurationDirectory(): ?string
+	{
+		$arguments = $_SERVER['argv'] ?? [];
+		if (!is_array($arguments))
+		{
+			return null;
+		}
+
+		$configurationFile = null;
+		$expectsValue = false;
+		foreach ($arguments AS $argument)
+		{
+			if (!is_string($argument) || $argument === '--')
+			{
+				break;
+			}
+
+			if ($expectsValue)
+			{
+				$configurationFile = $argument;
+				$expectsValue = false;
+			}
+			else if ($argument === '-c' || $argument === '--configuration')
+			{
+				$expectsValue = true;
+			}
+			else if (str_starts_with($argument, '--configuration='))
+			{
+				$configurationFile = substr($argument, strlen('--configuration='));
+			}
+			else if (str_starts_with($argument, '-c') && !str_starts_with($argument, '--'))
+			{
+				$configurationFile = substr($argument, 2);
+			}
+		}
+
+		if ($configurationFile === null || $configurationFile === '')
+		{
+			return null;
+		}
+
+		$configurationFile = realpath($configurationFile);
+
+		return $configurationFile === false ? null : dirname($configurationFile);
 	}
 
 	private static function findRootDirectory(string $directory): ?string

@@ -49,17 +49,17 @@ parameters:
 		- .
 	excludePaths:
 		analyseAndScan:
-			- vendor
-			- _data
-			- _dev
-			- _files
-			- _no_upload
-			- _output
-			- _releases
+			- vendor (?)
+			- _data (?)
+			- _dev (?)
+			- _files (?)
+			- _no_upload (?)
+			- _output (?)
+			- _releases (?)
 ```
 
-Leave `_output` out of scanning: `option_hint.php` declares a second `XF\Options` that hides the
-real one.
+`(?)` marks a path as optional, since not every add-on has every directory. Leave `_output` out
+of scanning: `option_hint.php` declares a second `XF\Options` that hides the real one.
 
 Then run PHPStan from the add-on directory:
 
@@ -68,8 +68,16 @@ cd src/addons/Vendor/AddOn
 phpstan analyse
 ```
 
-The XenForo root and add-on ID come from the working directory. To analyse from elsewhere,
-set `XF_ROOT` (the installation root) and `XF_ADDON` (comma-separated add-on IDs).
+The XenForo root and add-on ID come from the working directory. When the working directory is
+not inside an add-on, they come from the directory of the `--configuration` (`-c`) file instead,
+so this works from the XenForo root as well:
+
+```sh
+phpstan analyse -c src/addons/Vendor/AddOn/phpstan.neon.dist
+```
+
+To override both, set `XF_ROOT` (the installation root) and `XF_ADDON` (comma-separated add-on
+IDs).
 
 Add-ons listed in `addon.json` `require` are loaded as well, so members they add through class
 extensions resolve too.
@@ -79,6 +87,13 @@ Keep the file out of release builds by adding this to the `exec` list in `build.
 ```json
 "rm -f _build/upload/src/addons/{addon_id}/phpstan.neon.dist"
 ```
+
+### PhpStorm
+
+PhpStorm may run PHPStan from the project root, but it passes the configuration file on the
+command line. Point **Settings › PHP › Quality Tools › PHPStan › Configuration file** at the
+add-on's `phpstan.neon.dist`. PhpStorm takes one configuration file per project; change it when
+you switch add-ons.
 
 ### Core option types
 

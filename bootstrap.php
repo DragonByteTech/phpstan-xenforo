@@ -18,7 +18,7 @@ if (!class_exists(AddOnContext::class))
 	});
 }
 
-$rootDir = AddOnContext::locateRootDirectory((string) getcwd());
+$rootDir = AddOnContext::locateRootDirectory((string) getcwd(), AddOnContext::getConfigurationDirectory());
 if ($rootDir === null)
 {
 	return;
