@@ -43,6 +43,13 @@ namespace XF
 	}
 }
 
+namespace XF\Repository
+{
+	class UserRepository
+	{
+	}
+}
+
 namespace XF\Mvc\Entity
 {
 	abstract class Entity

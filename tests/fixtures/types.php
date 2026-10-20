@@ -9,6 +9,7 @@ use XF\Finder\UserFinder;
 use XF\Mvc\Entity\AbstractCollection;
 use XF\Mvc\Entity\Manager;
 use XF\Mvc\ParameterBag;
+use XF\Repository\UserRepository;
 
 function shortNames(Manager $em): void
 {
@@ -44,6 +45,11 @@ function emptyCollection(Manager $em): AbstractCollection
 function masterPhrase(StyleProperty $styleProperty): void
 {
 	\PHPStan\Testing\assertType('XF\Entity\Phrase|null', $styleProperty->getMasterPhrase(true));
+}
+
+function usersByNames(): void
+{
+	\PHPStan\Testing\assertType('XF\Mvc\Entity\ArrayCollection<XF\Entity\User>', \XF::repository(UserRepository::class)->getUsersByNames(['Admin']));
 }
 
 function classExtensionMembers(User $user, UserOption $option): void

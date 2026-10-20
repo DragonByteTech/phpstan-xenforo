@@ -112,6 +112,11 @@ services:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
 
 	-
+		class: DragonByteTech\PHPStanXenForo\Type\UsersByNamesReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
 		class: DragonByteTech\PHPStanXenForo\Ignore\ExtensionTypeMismatchIgnoreExtension
 		tags:
 			- phpstan.ignoreErrorExtension
