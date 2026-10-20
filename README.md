@@ -107,6 +107,19 @@ cd src/addons/DBTech/MemberMap
 phpstan analyse -c /Users/Shared/www/git/phpstan-xenforo/tests/phpstan.neon
 ```
 
+CI cannot run them, as it has no XenForo. It lints every file on each supported PHP version,
+checks code style, and analyses the extension itself at level max against the XenForo
+declarations in `tests/stubs/xenforo.php`. To run the same checks locally:
+
+```sh
+composer install --no-plugins
+composer cs
+composer analyse
+```
+
+`--no-plugins` matters when `phpstan/extension-installer` is installed globally: global plugins
+also run in this project and would point the global PHPStan at this project's `vendor`.
+
 ## Limits
 
 - XenForo is loaded with `XF::bootstrap()`, `startAutoloader()` and `setupClassAliases()` only.

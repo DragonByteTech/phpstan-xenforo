@@ -53,7 +53,7 @@ final class FinderFluentReturnTypeExtension implements DynamicMethodReturnTypeEx
 			&& in_array($methodReflection->getName(), self::FLUENT_METHODS, true);
 	}
 
-	public function getTypeFromMethodCall(MethodReflection $methodReflection, MethodCall $methodCall, Scope $scope): ?Type
+	public function getTypeFromMethodCall(MethodReflection $methodReflection, MethodCall $methodCall, Scope $scope): Type
 	{
 		return $scope->getType($methodCall->var);
 	}

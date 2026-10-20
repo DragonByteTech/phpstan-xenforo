@@ -65,17 +65,20 @@ final class ShortNameTypeResolverExtension implements ExpressionTypeResolverExte
 		$variants = $method->getVariants();
 		$parameter = $variants[0]->getParameters()[0] ?? null;
 		$parameterType = $parameter?->getType();
-		if (
-			!$parameterType instanceof GenericClassStringType
-			|| !$parameterType->getGenericType() instanceof TemplateType
-		)
+		if ($parameterType === null || !$parameterType->isClassString()->yes())
+		{
+			return null;
+		}
+
+		$templateType = $parameterType->getClassStringObjectType();
+		if (!$templateType instanceof TemplateType)
 		{
 			return null;
 		}
 
 		$className = $this->shortNameResolver->resolve(
 			$shortNames[0]->getValue(),
-			$parameterType->getGenericType()->getBound()
+			$templateType->getBound()
 		);
 		if ($className === null)
 		{

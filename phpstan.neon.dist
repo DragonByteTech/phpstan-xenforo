@@ -1,0 +1,11 @@
+# Analyses the extension itself. tests/ is left out: the fixtures need a XenForo installation.
+
+parameters:
+	level: max
+
+	paths:
+		- src
+		- bootstrap.php
+
+	scanFiles:
+		- tests/stubs/xenforo.php
