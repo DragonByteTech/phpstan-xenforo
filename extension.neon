@@ -24,6 +24,9 @@ parameters:
 		- XF\Import\Data\AbstractData
 		- XF\CustomField\Set
 		- XF\Api\Result\EntityResult
+		- XF\Draft
+		- XF\SimpleCache
+		- XF\SimpleCacheSet
 
 	# Every rule names a XenForo class, so none can match in other projects when the extension
 	# is installed globally. Broader conventions are in XenForoDocblockIgnoreExtension.
@@ -83,6 +86,27 @@ parameters:
 		-
 			identifier: argument.type
 			message: '#^Parameter \#\d+ \$(grouper|childKeyFn) of method XF\\Mvc\\Entity\\AbstractCollection<.+>::groupBy\(\) expects \(callable\(.+\): int\)\|int\|string(\|null)?, Closure\(.+\): string given\.$#'
+			reportUnmatched: false
+
+		# getReactionMetrics() documents its content as the handler's own entity, but container
+		# handlers pass the first message, as core's ThreadHandler passes the first post.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#1 \$content of method XF\\ActivityLog\\AbstractHandler<.+>::getReactionMetrics\(\) expects .+, .+ given\.$#'
+			reportUnmatched: false
+
+		# noPermission() documents a single message, but it passes the message on to error(),
+		# which also takes a list.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#1 \$message of method XF\\Mvc\\Controller::noPermission\(\) expects string\|XF\\Phrase\|null, array<.+> given\.$#'
+			reportUnmatched: false
+
+		# `AbstractCollection|Entity[]` is read as a collection of entities only, but these
+		# methods iterate their argument and also take arrays of entities.
+		-
+			identifier: argument.type
+			message: '#^Parameter \#\d+ \$\w+ of method XF\\.+ expects iterable<.+>&XF\\Mvc\\Entity\\AbstractCollection, array<.+> given\.$#'
 			reportUnmatched: false
 
 		# Handlers document titles as string, but XenForo returns phrases throughout.

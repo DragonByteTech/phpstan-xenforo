@@ -2,7 +2,7 @@
 
 namespace DragonByteTech\PHPStanXenForo;
 
-use function array_filter, array_key_exists, array_keys, array_shift, array_slice, basename, class_exists, count, dirname, explode, file_get_contents, getcwd, getenv, glob, implode, is_array, is_dir, is_file, is_string, json_decode, ltrim, realpath, simplexml_load_file, str_contains, str_replace, str_starts_with, strlen, strrpos, substr;
+use function array_filter, array_key_exists, array_keys, array_merge, array_shift, array_slice, basename, class_exists, count, dirname, explode, file_get_contents, getcwd, getenv, glob, implode, is_array, is_dir, is_file, is_string, json_decode, ltrim, realpath, simplexml_load_file, str_contains, str_replace, str_starts_with, strlen, strrpos, substr, trim;
 
 /**
  * Describes the XenForo installation and add-ons being analysed. The bootstrap file and the
@@ -124,6 +124,48 @@ final class AddOnContext
 	public function getAddOnDirectory(string $addOnId): string
 	{
 		return $this->rootDir . '/src/addons/' . $addOnId;
+	}
+
+	/**
+	 * @return list<string>
+	 */
+	public function getInstalledAddOnIds(): array
+	{
+		if ($this->rootDir === null)
+		{
+			return [];
+		}
+
+		$addOnsDir = $this->rootDir . '/src/addons/';
+		$files = array_merge(
+			glob($addOnsDir . '*/addon.json') ?: [],
+			glob($addOnsDir . '*/*/addon.json') ?: []
+		);
+
+		$addOnIds = [];
+		foreach ($files AS $file)
+		{
+			$addOnIds[] = substr(dirname($file), strlen($addOnsDir));
+		}
+
+		return $addOnIds;
+	}
+
+	/**
+	 * The add-on's Composer directory, from `composer_autoload` in its addon.json.
+	 */
+	public function getComposerDirectory(string $addOnId): ?string
+	{
+		$addOnDir = $this->getAddOnDirectory($addOnId);
+		$addOnJson = is_file($addOnDir . '/addon.json')
+			? json_decode((string) file_get_contents($addOnDir . '/addon.json'), true)
+			: null;
+
+		$composerDir = is_array($addOnJson) && is_string($addOnJson['composer_autoload'] ?? null)
+			? $addOnDir . '/' . trim($addOnJson['composer_autoload'], '/')
+			: null;
+
+		return $composerDir !== null && is_dir($composerDir) ? $composerDir : null;
 	}
 
 	public function getProxyBase(string $proxyClass): ?string
