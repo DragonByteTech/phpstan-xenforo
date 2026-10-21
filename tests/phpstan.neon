@@ -1,7 +1,8 @@
 # Type inference checks for the extension. assertType() mismatches are reported as errors.
-# Run from an add-on that the fixtures reference (see README.md):
-#   cd <xf>/src/addons/DBTech/MemberMap && phpstan analyse -c <package>/tests/phpstan.neon
-# extension.neon comes from phpstan/extension-installer; include it here if that is not installed.
+# Run with tests/run.sh, which links the add-on in tests/addon into a XenForo installation.
+
+includes:
+	- ../extension.neon
 
 parameters:
 	level: 5

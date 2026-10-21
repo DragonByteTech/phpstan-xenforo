@@ -75,14 +75,15 @@ function instantiateEntity(Manager $em): void
 
 function classExtensionMembers(User $user, UserOption $option): void
 {
-	// Column added by DBTech\MemberMap\XF\Entity\UserOption::getStructure().
-	\PHPStan\Testing\assertType('float', $option->dbtech_membermap_lat);
-	\PHPStan\Testing\assertType('bool', $user->canViewDbtechMemberMap());
+	// Column added by PHPStanXenForoTest\XF\Entity\UserOption::getStructure() (tests/addon).
+	\PHPStan\Testing\assertType('float', $option->phpstan_xenforo_test_lat);
+	\PHPStan\Testing\assertType('bool', $user->canViewPhpstanXenForoTest());
 }
 
 function options(): void
 {
-	\PHPStan\Testing\assertType('bool|null', \XF::options()->dbtech_membermap_all);
+	// Typed by the test add-on's _output/option_hint.php.
+	\PHPStan\Testing\assertType('bool|null', \XF::options()->phpstanXenForoTestEnabled);
 	// Typed by Options.stub in the XenForo root (xf-dev:generate-options-stub).
 	\PHPStan\Testing\assertType('string|null', \XF::options()->boardTitle);
 	\PHPStan\Testing\assertType('mixed', \XF::options()->noSuchOption);

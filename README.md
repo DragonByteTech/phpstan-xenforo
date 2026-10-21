@@ -1,6 +1,7 @@
 # PHPStan for XenForo add-ons
 
 [![DragonByte Tech](https://img.shields.io/badge/DragonByte%20Tech-%23B71532)](https://www.dragonbyte-tech.com)
+[![Packagist](https://img.shields.io/packagist/v/dragonbytetech/phpstan-xenforo)](https://packagist.org/packages/dragonbytetech/phpstan-xenforo)
 [![Status](https://img.shields.io/github/check-runs/DragonByteTech/phpstan-xenforo/main?label=status)](https://github.com/DragonByteTech/phpstan-xenforo/actions)
 
 A [PHPStan](https://phpstan.org) extension that analyses [XenForo](https://xenforo.com) 2.3 add-ons from inside a development installation,
@@ -25,16 +26,61 @@ every rule it adds is limited to XenForo classes or switched off. Project-wide s
 
 ## Install
 
-Install globally, next to a global PHPStan:
-
-```sh
-composer global config repositories.phpstan-xenforo path /Users/Shared/www/git/phpstan-xenforo
-composer global config allow-plugins.phpstan/extension-installer true
-composer global require phpstan/extension-installer dragonbytetech/phpstan-xenforo:@dev
-```
-
 `phpstan/extension-installer` includes `extension.neon` automatically. Without it, add the file to
 the add-on's `includes` yourself.
+
+### Globally
+
+Install next to a global PHPStan, and every add-on in every XenForo installation can use it:
+
+```sh
+composer global config allow-plugins.phpstan/extension-installer true
+composer global require phpstan/extension-installer dragonbytetech/phpstan-xenforo
+```
+
+### Per add-on
+
+Install into the add-on's own `vendor` to pin PHPStan and the extension in its `composer.lock`:
+
+```sh
+cd src/addons/Vendor/AddOn
+composer config allow-plugins.phpstan/extension-installer true
+composer require --dev phpstan/phpstan phpstan/extension-installer dragonbytetech/phpstan-xenforo
+```
+
+Run it as `vendor/bin/phpstan analyse` instead of `phpstan analyse`.
+
+Use one or the other. Composer also runs global plugins in the add-on, and a global
+`phpstan/extension-installer` takes the place of the add-on's copy. The add-on's PHPStan then
+finds no extensions, and the global PHPStan is pointed at the add-on's `vendor`. To keep the
+global install, run the add-on's Composer commands with an empty Composer home, which loads no
+global plugins:
+
+```sh
+COMPOSER_HOME="$(mktemp -d)" composer install
+```
+
+If the add-on uses Composer for nothing else, `composer.json` has only `require-dev` entries, and
+none of it belongs in a release. Remove it all in `build.json`. XenForo copies the add-on to
+`_build/upload` before it runs `exec`, and hashes the files afterwards:
+
+```json
+{
+	"exec": [
+		"rm -f _build/upload/src/addons/{addon_id}/composer.json",
+		"rm -f _build/upload/src/addons/{addon_id}/composer.lock",
+		"rm -f _build/upload/src/addons/{addon_id}/phpstan.neon.dist",
+		"rm -rf _build/upload/src/addons/{addon_id}/vendor"
+	]
+}
+```
+
+An add-on with runtime dependencies (`composer_autoload` in `addon.json`) must keep those files.
+Remove only `phpstan.neon.dist`, and drop the development packages from the build instead:
+
+```json
+"composer install --working-dir=_build/upload/src/addons/{addon_id}/ --no-dev --optimize-autoloader"
+```
 
 ## Use
 
@@ -93,6 +139,8 @@ Keep the file out of release builds by adding this to the `exec` list in `build.
 "rm -f _build/upload/src/addons/{addon_id}/phpstan.neon.dist"
 ```
 
+A per-add-on install has more to remove (see [Per add-on](#per-add-on)).
+
 ### PhpStorm
 
 PhpStorm may run PHPStan from the project root, but it passes the configuration file on the
@@ -119,12 +167,14 @@ parameters:
 
 ## Tests
 
-`tests/fixtures` holds `assertType()` cases. They rely on `DBTech/MemberMap`'s class extensions
-and options:
+`tests/fixtures` holds `assertType()` cases. They need a XenForo 2.3 installation, and the
+add-on-specific cases use the class extensions and options of the test add-on in `tests/addon`.
+`tests/run.sh` links that add-on into the installation, runs the fixtures with this project's
+PHPStan, and removes the link again. The add-on is never installed:
 
 ```sh
-cd src/addons/DBTech/MemberMap
-phpstan analyse -c /Users/Shared/www/git/phpstan-xenforo/tests/phpstan.neon
+composer install --no-plugins
+tests/run.sh /path/to/xenforo
 ```
 
 CI cannot run them, as it has no XenForo. It lints every file on each supported PHP version,

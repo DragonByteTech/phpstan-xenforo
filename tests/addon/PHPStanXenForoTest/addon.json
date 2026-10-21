@@ -1,0 +1,13 @@
+{
+    "title": "PHPStan for XenForo test fixtures",
+    "description": "Class extensions and options for tests/fixtures. Linked into an installation by tests/run.sh, never installed.",
+    "version_id": 1000070,
+    "version_string": "1.0.0",
+    "dev": "DragonByte Technologies",
+    "require": {
+        "XF": [
+            2030070,
+            "XenForo 2.3.0+"
+        ]
+    }
+}
