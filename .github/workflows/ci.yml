@@ -33,7 +33,15 @@ jobs:
 
       - run: composer validate --strict
 
-      - run: find src tests bootstrap.php -name '*.php' -print0 | xargs -0 -n1 php -l
+      # php -l exits successfully on deprecations, so its output is checked for them.
+      - run: |
+          find src tests bootstrap.php -name '*.php' -print0 \
+            | xargs -0 -n1 php -d error_reporting=-1 -d display_errors=stderr -d log_errors=0 -l 2>&1 \
+            | tee "$RUNNER_TEMP/lint.log"
+          if grep -qE '^(PHP )?Deprecated:' "$RUNNER_TEMP/lint.log"; then
+            echo "::error::php -l reported deprecations"
+            exit 1
+          fi
 
   cs:
     name: Code style
@@ -51,16 +59,27 @@ jobs:
       - run: composer cs
 
   phpstan:
-    name: PHPStan
+    name: PHPStan (${{ matrix.dependencies }} dependencies)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.5'
+            dependencies: highest
+          # The lowest versions composer.json allows, on the lowest PHP it supports.
+          - php: '8.1'
+            dependencies: lowest
     steps:
       - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: ${{ matrix.php }}
           coverage: none
 
       - uses: ramsey/composer-install@v4
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
 
       - run: composer analyse -- --no-progress --error-format=github
