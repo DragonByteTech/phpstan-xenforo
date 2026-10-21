@@ -1,0 +1,9 @@
+# Development files, left out of the archives Composer installs from.
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.github export-ignore
+/.gitignore export-ignore
+/.ignore export-ignore
+/.php-cs-fixer.php export-ignore
+/phpstan.neon.dist export-ignore
+/tests export-ignore
