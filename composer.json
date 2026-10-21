@@ -3,6 +3,16 @@
 	"description": "PHPStan extension for analysing XenForo 2.3 add-ons without false positives from class extensions, entity structures and options",
 	"type": "phpstan-extension",
 	"license": "MIT",
+	"authors": [
+		{
+			"name": "Fillip H.",
+			"role": "Developer"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/DragonByteTech/phpstan-xenforo/issues",
+		"source": "https://github.com/DragonByteTech/phpstan-xenforo"
+	},
 	"keywords": [
 		"phpstan",
 		"xenforo",
