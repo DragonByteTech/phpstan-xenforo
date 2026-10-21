@@ -168,6 +168,11 @@ services:
 			- phpstan.broker.dynamicMethodReturnTypeExtension
 
 	-
+		class: DragonByteTech\PHPStanXenForo\Type\InstantiateEntityReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicMethodReturnTypeExtension
+
+	-
 		class: DragonByteTech\PHPStanXenForo\Type\MasterPhraseReturnTypeExtension
 		tags:
 			- phpstan.broker.dynamicMethodReturnTypeExtension

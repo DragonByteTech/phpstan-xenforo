@@ -67,6 +67,12 @@ function mailTransport(): void
 	\PHPStan\Testing\assertType('Symfony\Component\Mailer\Transport\AbstractTransport', Mailer::getTransportFromOption('sendmail', []));
 }
 
+function instantiateEntity(Manager $em): void
+{
+	\PHPStan\Testing\assertType('XF\Entity\User', $em->instantiateEntity(User::class, ['user_id' => 1]));
+	\PHPStan\Testing\assertType('XF\Entity\User|null', $em->instantiateEntity(User::class, [], [], Manager::INSTANTIATE_PROXIED));
+}
+
 function classExtensionMembers(User $user, UserOption $option): void
 {
 	// Column added by DBTech\MemberMap\XF\Entity\UserOption::getStructure().
